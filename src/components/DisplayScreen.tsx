@@ -40,6 +40,34 @@ export const DisplayScreen: React.FC<DisplayScreenProps> = ({
     // Request current state from any active controller
     castService.requestCurrentState();
 
+    // Check if opened as a Presentation API receiver on Smart TV / Anyview
+    if (typeof window !== 'undefined' && 'presentation' in navigator && (navigator as any).presentation?.receiver) {
+      try {
+        (navigator as any).presentation.receiver.connectionList
+          .then((list: any) => {
+            const setupConnection = (conn: any) => {
+              conn.addEventListener('message', (event: any) => {
+                try {
+                  const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                  if (data && data.type === 'STATE_UPDATE' && data.payload) {
+                    setInternalState(data.payload);
+                  }
+                } catch {
+                  // ignore
+                }
+              });
+            };
+            list.connections.forEach(setupConnection);
+            list.addEventListener('connectionavailable', (e: any) => {
+              setupConnection(e.connection);
+            });
+          })
+          .catch(() => {});
+      } catch {
+        // ignore
+      }
+    }
+
     return () => {
       unsubscribe();
     };

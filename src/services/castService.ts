@@ -13,11 +13,15 @@ class CastSyncService {
   private hasActiveReceiver: boolean = false;
   private isTvWindowOpen: boolean = false;
 
+  private presentationConnection: any = null;
+  private isAnyviewConnectedManually: boolean = false;
+
   constructor() {
     this.currentRoomCode = storageService.getRoomCode();
     this.initBroadcastChannel();
     this.initStorageListener();
     this.initGoogleCast();
+    this.initPresentationDefault();
   }
 
   public setRoomCode(code: string) {
@@ -31,7 +35,96 @@ class CastSyncService {
   }
 
   public isConnected(): boolean {
-    return this.castSession !== null || this.isTvWindowOpen || this.hasActiveReceiver;
+    const isPresConnected = this.presentationConnection && this.presentationConnection.state === 'connected';
+    return this.castSession !== null || this.isTvWindowOpen || this.hasActiveReceiver || isPresConnected || this.isAnyviewConnectedManually;
+  }
+
+  public setAnyviewConnected(connected: boolean) {
+    this.isAnyviewConnectedManually = connected;
+    this.notifyConnChange();
+  }
+
+  public isAnyviewActive(): boolean {
+    const isPresConnected = this.presentationConnection && this.presentationConnection.state === 'connected';
+    return isPresConnected || this.isAnyviewConnectedManually;
+  }
+
+  public isPresentationSupported(): boolean {
+    return typeof window !== 'undefined' && 'PresentationRequest' in window;
+  }
+
+  private initPresentationDefault() {
+    if (typeof window === 'undefined' || !('PresentationRequest' in window)) return;
+    try {
+      const url = this.getDisplayUrl();
+      const request = new (window as any).PresentationRequest([url]);
+      if ('presentation' in navigator && (navigator as any).presentation) {
+        (navigator as any).presentation.defaultRequest = request;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  public async requestAnyviewPresentation(): Promise<{ success: boolean; message: string; connected?: boolean }> {
+    if (typeof window === 'undefined') {
+      return { success: false, message: 'Window is not available' };
+    }
+
+    const url = this.getDisplayUrl();
+
+    if ('PresentationRequest' in window) {
+      try {
+        const request = new (window as any).PresentationRequest([url]);
+        const connection = await request.start();
+        this.presentationConnection = connection;
+        this.hasActiveReceiver = true;
+        this.notifyConnChange();
+
+        connection.addEventListener('connect', () => {
+          this.hasActiveReceiver = true;
+          this.notifyConnChange();
+          this.broadcastState(storageService.getDisplayState());
+        });
+
+        connection.addEventListener('close', () => {
+          this.presentationConnection = null;
+          this.notifyConnChange();
+        });
+
+        connection.addEventListener('terminate', () => {
+          this.presentationConnection = null;
+          this.notifyConnChange();
+        });
+
+        // Send initial state immediately once connected
+        setTimeout(() => {
+          try {
+            connection.send(JSON.stringify({
+              type: 'STATE_UPDATE',
+              payload: storageService.getDisplayState()
+            }));
+          } catch {
+            // ignore
+          }
+        }, 800);
+
+        return { success: true, message: 'Connected to Anyview / Wireless Display', connected: true };
+      } catch (err: any) {
+        if (err?.name === 'AbortError' || err?.name === 'NotAllowedError') {
+          return { success: false, message: 'Wireless display selection was dismissed or cancelled.' };
+        }
+        return { 
+          success: false, 
+          message: err?.message || 'Direct Presentation request could not complete. Use phone Quick Settings (Smart View / Cast) or the Hisense TV Browser.' 
+        };
+      }
+    }
+
+    return {
+      success: false,
+      message: 'Direct web Presentation is best supported in Chrome / Android browsers. Use phone Smart View / Screen Mirroring or the Hisense VIDAA browser.'
+    };
   }
 
   public subscribeConnection(listener: (connected: boolean) => void): () => void {
@@ -175,6 +268,18 @@ class CastSyncService {
     if (this.castSession) {
       try {
         this.castSession.sendMessage('urn:x-cast:com.asorcast.presentation', updated);
+      } catch {
+        // ignore
+      }
+    }
+
+    // Wireless Display / Anyview Presentation API connection if active
+    if (this.presentationConnection && this.presentationConnection.state === 'connected') {
+      try {
+        this.presentationConnection.send(JSON.stringify({
+          type: 'STATE_UPDATE',
+          payload: updated
+        }));
       } catch {
         // ignore
       }

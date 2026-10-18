@@ -477,6 +477,10 @@ export default function App() {
         onApplyPreset={handleApplyPreset}
         onUpdateHymns={handleUpdateHymns}
         onUpdateDisplayState={handleUpdateDisplayState}
+        onOpenConnectModal={() => {
+          setIsSettingsModalOpen(false);
+          setIsConnectModalOpen(true);
+        }}
       />
 
       {/* Offline Indicator */}

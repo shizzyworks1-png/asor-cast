@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HymnSong, ServicePreset, DisplayState, BackgroundItem } from '../types/presentation';
 import { storageService } from '../services/storageService';
+import { castService } from '../services/castService';
 import { 
   Settings as SettingsIcon, 
   X, 
@@ -15,7 +16,10 @@ import {
   Tv, 
   Layers,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Radio,
+  Smartphone,
+  ExternalLink
 } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -28,6 +32,7 @@ interface SettingsModalProps {
   onApplyPreset: (preset: ServicePreset) => void;
   onUpdateHymns: (hymns: HymnSong[]) => void;
   onUpdateDisplayState: (partial: Partial<DisplayState>) => void;
+  onOpenConnectModal?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -39,9 +44,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   isDark,
   onApplyPreset,
   onUpdateHymns,
-  onUpdateDisplayState
+  onUpdateDisplayState,
+  onOpenConnectModal
 }) => {
-  const [activeTab, setActiveTab] = useState<'presets' | 'hymns' | 'display'>('presets');
+  const [activeTab, setActiveTab] = useState<'presets' | 'hymns' | 'anyview'>('presets');
   const [presets, setPresets] = useState<ServicePreset[]>(() => storageService.getPresets());
 
   // New Preset state
@@ -259,6 +265,18 @@ Christ the Lord!`
             <Upload className="w-4 h-4" />
             <span>Bulk Hymn Import</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('anyview')}
+            className={`flex items-center gap-2 py-3 px-4 text-xs sm:text-sm font-bold border-b-2 transition ${
+              activeTab === 'anyview'
+                ? 'border-red-600 text-red-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <Tv className="w-4 h-4" />
+            <span>Anyview Cast & TV</span>
+          </button>
         </div>
 
         {/* Content area */}
@@ -449,6 +467,120 @@ Christ the Lord!`
                   <span>{importStatus}</span>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB 3: ANYVIEW CAST & TV BROADCAST SETTINGS */}
+          {activeTab === 'anyview' && (
+            <div className="space-y-4 text-left">
+              <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tv className="w-5 h-5 text-red-600" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Anyview Cast (Hisense & VIDAA Smart TVs)
+                    </h3>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400">
+                    Live TV Broadcast
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Connect your church Hisense TV wirelessly via Anyview Cast, or open the sanctuary display in the Hisense VIDAA TV browser for uninterrupted presentation.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    onClick={() => {
+                      if (onOpenConnectModal) {
+                        onClose();
+                        onOpenConnectModal();
+                      }
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 active:scale-95 transition"
+                  >
+                    <Radio className="w-4 h-4" />
+                    <span>Open Anyview Connection Options</span>
+                  </button>
+
+                  <button
+                    onClick={() => castService.openDisplayWindow()}
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-red-500" />
+                    <span>Test TV Display Window</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Display & Text Preferences */}
+              <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  TV Display Text & Scaling Preferences
+                </h4>
+
+                {/* Font Size */}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Sanctuary Screen Font Size</span>
+                  <div className="flex items-center gap-1">
+                    {(['sm', 'md', 'lg', 'xl'] as const).map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => onUpdateDisplayState({ fontSize: size })}
+                        className={`px-2.5 py-1 rounded-lg font-bold uppercase transition ${
+                          displayState.fontSize === size
+                            ? 'bg-red-600 text-white shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Text Alignment */}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Text Alignment</span>
+                  <div className="flex items-center gap-1">
+                    {(['center', 'left'] as const).map((align) => (
+                      <button
+                        key={align}
+                        onClick={() => onUpdateDisplayState({ alignment: align })}
+                        className={`px-3 py-1 rounded-lg font-bold capitalize transition ${
+                          displayState.alignment === align
+                            ? 'bg-red-600 text-white shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                        }`}
+                      >
+                        {align}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Background Dimmer */}
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between font-bold text-slate-700 dark:text-slate-300">
+                    <span>Background Dimmer Overlay</span>
+                    <span className="text-red-600">{Math.round((displayState.overlayOpacity ?? 0.35) * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.85"
+                    step="0.05"
+                    value={displayState.overlayOpacity ?? 0.35}
+                    onChange={(e) => onUpdateDisplayState({ overlayOpacity: parseFloat(e.target.value) })}
+                    className="w-full accent-red-600 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400">
+                    <span>Clear (0%)</span>
+                    <span>Standard (35%)</span>
+                    <span>High Contrast (85%)</span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
