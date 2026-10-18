@@ -1,0 +1,6 @@
+{
+  "name": "Asor Cast",
+  "description": "Mobile-first church presentation app to display KJV Bible passages, hymns, worship backgrounds, and announcements on TVs and projectors directly from an Android phone.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

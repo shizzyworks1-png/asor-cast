@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --asor-red: #dc2626;
+    --asor-red-light: #fee2e2;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.asor-badge-red {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.dark .asor-badge-red {
+  background-color: rgba(153, 27, 27, 0.3);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-scripture {
+  font-family: 'Merriweather', Georgia, serif;
+}
+
+/* Custom scrollbars for presentation lists */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Text glow / drop-shadow utility for TV projector projection */
+.text-projector-shadow {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 0, 0, 0.7);
+}
+
+.text-subtle-shadow {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+}
+
+/* Smooth fade transitions for projection changes */
+.fade-enter {
+  opacity: 0;
+  transform: scale(0.985);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1), transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+

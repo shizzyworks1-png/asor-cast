@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="asorRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="50%" stop-color="#dc2626" />
+      <stop offset="100%" stop-color="#b91c1c" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#991b1b" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Asor Signature Crimson Rounded Square Container -->
+  <rect width="512" height="512" rx="120" fill="url(#asorRedGrad)" filter="url(#shadow)" />
+  
+  <!-- Subtle inner border -->
+  <rect x="16" y="16" width="480" height="480" rx="104" fill="none" stroke="#fca5a5" stroke-width="4" opacity="0.3" />
+
+  <!-- Open Bible Illustration -->
+  <g fill="#ffffff">
+    <!-- Left Page -->
+    <path d="M 246 170 C 200 156, 140 162, 100 178 C 94 180, 90 186, 90 192 L 90 348 C 90 354, 96 360, 102 358 C 142 344, 202 338, 246 352 Z" />
+    <!-- Right Page -->
+    <path d="M 266 170 C 312 156, 372 162, 412 178 C 418 180, 422 186, 422 192 L 422 348 C 422 354, 416 360, 410 358 C 370 344, 310 338, 266 352 Z" />
+    <!-- Spine center shadow -->
+    <path d="M 252 172 L 260 172 L 260 354 L 252 354 Z" fill="#b91c1c" opacity="0.3" />
+  </g>
+
+  <!-- Cross Silhouette / Motif -->
+  <!-- Latin Cross positioned on the Bible / Cover -->
+  <path d="M 256 120 L 256 260" stroke="#ffffff" stroke-width="22" stroke-linecap="round" />
+  <path d="M 204 168 L 308 168" stroke="#ffffff" stroke-width="22" stroke-linecap="round" />
+
+  <!-- Cast Waves (Smart TV / Screen projection) -->
+  <path d="M 330 380 A 64 64 0 0 1 394 444" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity="0.9" />
+  <path d="M 330 408 A 36 36 0 0 1 366 444" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round" opacity="0.95" />
+  <circle cx="334" cy="440" r="10" fill="#ffffff" />
+</svg>
